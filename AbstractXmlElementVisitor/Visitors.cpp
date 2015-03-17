@@ -1,3 +1,17 @@
+//////////////////////////////////////////////////////////////////////////
+// Visitors.cpp -  Contains actions										//
+// ver 1.0																//
+// ---------------------------------------------------------------------//
+// copyright © Isira Samarasekera, 2015									//
+// All rights granted provided that this notice is retained				//
+// ---------------------------------------------------------------------//
+// Language:    Visual C++, Visual Studio Ultimate 2013                 //
+// Platform:    Mac Book Pro, Core i5, Windows 8.1						//
+// Application: Project #2 – XmlDocument,2015							//
+// Author:      Isira Samarasekera, Syracuse University					//
+//              issamara@syr.edu										//
+//////////////////////////////////////////////////////////////////////////
+
 #include "Visitors.h"
 #include "../XmlElement/XmlElement.h"
 #include <iostream>
@@ -7,18 +21,15 @@ using namespace XmlProcessing;
 size_t PrintVisitor::count = 0;
 size_t PrintVisitor::tabSize = 2;
 
-
-
-bool PrintVisitor::visit(TextElement& element)
+void PrintVisitor::visit(TextElement& element)
 {
 	std::string spacer(tabSize * ++count, ' ');
 	std::string xml = "\n" + spacer + element.value();
 	--count;
 	std::cout << xml;
-	return false;
 }
 
-bool PrintVisitor::visit(TaggedElement& element)
+void PrintVisitor::visit(TaggedElement& element)
 {
 	std::string spacer(tabSize*++count, ' ');
 	std::string xml = "\n" + spacer + "<" + element.value();
@@ -32,30 +43,27 @@ bool PrintVisitor::visit(TaggedElement& element)
 	}
 	xml += ">";
 	std::cout << xml;
-	return false;
 
 }
 
-bool PrintVisitor::postVisit(TaggedElement& element)
+void PrintVisitor::postVisit(TaggedElement& element)
 {
 	std::string xml;
 	std::string spacer(tabSize*count, ' ');
 	xml += "\n" + spacer + "</" + element.value() + ">";
 	--count;
 	std::cout << xml;
-	return false;
 }
-bool PrintVisitor::visit(CommentElement& element)
+void PrintVisitor::visit(CommentElement& element)
 {
 	std::string spacer(tabSize * ++count, ' ');
 	std::string xml = "\n" + spacer + "<!--" + element.value() + "-->";
 	--count;
 	std::cout << xml;
-	return false;
 }
 
 
-bool PrintVisitor::visit(ProcInstrElement& element)
+void PrintVisitor::visit(ProcInstrElement& element)
 {
 	std::string spacer(tabSize * ++count, ' ');
 	std::string xml = "\n" + spacer + "<?xml";
@@ -70,10 +78,9 @@ bool PrintVisitor::visit(ProcInstrElement& element)
 	xml += "?>";
 	--count;
 	std::cout << xml;
-	return false;
 }
 
-bool PrintVisitor::visit(XmlDeclarElement& element)
+void PrintVisitor::visit(XmlDeclarElement& element)
 {
 	std::string spacer(tabSize * ++count, ' ');
 	std::string xml = "\n" + spacer + "<?xml";
@@ -88,19 +95,17 @@ bool PrintVisitor::visit(XmlDeclarElement& element)
 	xml += "?>";
 	--count;
 	std::cout << xml;
-	return false;
 }
 
 ElementFinderVisitor::ElementFinderVisitor(const std::string& tag):_tag(tag)
 {
 }
 
-bool ElementFinderVisitor::visit(TaggedElement& element)
+void ElementFinderVisitor::visit(TaggedElement& element)
 {
 	if (element.value() == _tag)
 		found.push_back(&element);
 
-	return false;
 }
 
 std::vector<AbstractXmlElement*> &ElementFinderVisitor::select()
@@ -118,7 +123,7 @@ AttributeIDFinderVisitor::AttributeIDFinderVisitor(const std::string& idAttribut
 {
 }
 
-bool AttributeIDFinderVisitor::visit(TaggedElement& element)
+void AttributeIDFinderVisitor::visit(TaggedElement& element)
 {
 	std::vector<std::pair<std::string, std::string>> atts = element.attribs();
 	for (auto it:atts)
@@ -129,12 +134,10 @@ bool AttributeIDFinderVisitor::visit(TaggedElement& element)
 		if (attrib == idAttribute_ && val == value_)
 		{
 			found.push_back(&element);
-			return true;
 		}
 	}
-	return false;
 }
-bool AttributeIDFinderVisitor::visit(XmlDeclarElement& element)
+void AttributeIDFinderVisitor::visit(XmlDeclarElement& element)
 {
 	std::vector<std::pair<std::string, std::string>> atts = element.attribs();
 	for (auto it : atts)
@@ -145,12 +148,10 @@ bool AttributeIDFinderVisitor::visit(XmlDeclarElement& element)
 		if (attrib == idAttribute_ && val == value_)
 		{
 			found.push_back(&element);
-			return true;
 		}
 	}
-	return false;
 }
-bool AttributeIDFinderVisitor::visit(ProcInstrElement& element)
+void AttributeIDFinderVisitor::visit(ProcInstrElement& element)
 {
 	std::vector<std::pair<std::string, std::string>> atts = element.attribs();
 	for (auto it : atts)
@@ -161,10 +162,8 @@ bool AttributeIDFinderVisitor::visit(ProcInstrElement& element)
 		if (attrib == idAttribute_ && val == value_)
 		{
 			found.push_back(&element);
-			return true;
 		}
 	}
-	return false;
 }
 
 
@@ -176,7 +175,7 @@ AttributeIDFinderVisitor::~AttributeIDFinderVisitor(){}
 
 DependentsFinderVisitor::DependentsFinderVisitor(AbstractXmlElement& element, const std::string& tag) :_element(element), _tag(tag){}
 
-bool DependentsFinderVisitor::visit(TaggedElement& element)
+void DependentsFinderVisitor::visit(TaggedElement& element)
 {
 	if (inside)
 	{
@@ -188,19 +187,17 @@ bool DependentsFinderVisitor::visit(TaggedElement& element)
 	{
 		inside = true;
 	}
-	return false;
 }
 
 
 
 
-bool DependentsFinderVisitor::postVisit(TaggedElement& element)
+void DependentsFinderVisitor::postVisit(TaggedElement& element)
 {
 	if (&element == &_element)
 	{
 		inside = false;
 	}
-	return false;
 }
 
 std::vector<AbstractXmlElement*>& DependentsFinderVisitor::select()
@@ -211,7 +208,7 @@ DependentsFinderVisitor::~DependentsFinderVisitor(){}
 
 ChildrenFinderVisitor::ChildrenFinderVisitor(AbstractXmlElement& element, const std::string& tag) :_element(element),_tag(tag){}
 
-bool ChildrenFinderVisitor::visit(TaggedElement& element)
+void ChildrenFinderVisitor::visit(TaggedElement& element)
 {
 
 	if (&element == &_element)
@@ -221,9 +218,8 @@ bool ChildrenFinderVisitor::visit(TaggedElement& element)
 			if (_tag.empty() || _tag == child->value())
 			found.push_back(child.get());
 		}	
-		return true;
+
 	}
-	return false;
 }
 
 std::vector<AbstractXmlElement*>& ChildrenFinderVisitor::select()

@@ -86,14 +86,18 @@ namespace XmlProcessing
 
 	XmlDocument& elementsWithAttribute(const std::string& attribute, const std::string& value);  // found_ contains sPtrs to descendents of prior found_[0]
 
-
-	
 	std::vector<AbstractXmlElement*> select();                            // return reference to found_.  Use std::move(found_) to clear found_
-	std::string toString();
+	std::string toString() const;
 	void accept(AbstractXmlElementVisitor& visitor)
 	{
 		pDocElement_->accept(visitor);
 	}
+
+	XmlDocument(XmlDocument&& doc);
+	XmlDocument& operator=(XmlDocument&& doc);
+
+	void save(std::string filePath);
+
   private:
     sPtr pDocElement_;         // AST that holds procInstr, comments, XML root, and more comments
     std::vector<AbstractXmlElement*> found_;  // query results

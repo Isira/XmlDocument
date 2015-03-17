@@ -4,6 +4,41 @@
 #include "../XmlElementParts/xmlElementParts.h"
 #include "../XmlElement/XmlElement.h"
 #include "../Repository/Repository.h"
+//////////////////////////////////////////////////////////////////////////
+// Actions.h -  Contains actions										//
+//																		//
+// ver 1.0																//
+// ---------------------------------------------------------------------//
+// copyright © Isira Samarasekera, 2015									//
+// All rights granted provided that this notice is retained				//
+// ---------------------------------------------------------------------//
+// Language:    Visual C++, Visual Studio Ultimate 2013                 //
+// Platform:    Mac Book Pro, Core i5, Windows 8.1						//
+// Application: Project #2 – XmlDocument,2015						//
+// Author:      Isira Samarasekera, Syracuse University					//
+//              issamara@syr.edu										//
+//////////////////////////////////////////////////////////////////////////
+/*
+* Module Operations:
+* ==================
+*
+* Public Interface:
+* =================
+
+*
+* Required Files:
+* ===============
+*
+* Build Command:
+* ==============
+* cl /EHa /DTEST_ACTIONS Actions.cpp
+*
+* Maintenance History:
+* ====================
+* ver 1.0 : 19 Mar 15
+* - first release
+*/
+
 enum NodeType
 {
 	DECLARATION,
@@ -37,6 +72,7 @@ class XMLElementFactory
 {
 	static std::shared_ptr<XmlProcessing::AbstractXmlElement> createTaggedElement(XmlParts xmlPart);
 	static std::shared_ptr<XmlProcessing::AbstractXmlElement> createXMLDeclaration(XmlParts xmlPart);
+	static std::shared_ptr<XmlProcessing::AbstractXmlElement> createProcessingInstructor(XmlParts xmlPart);
 	static std::shared_ptr<XmlProcessing::AbstractXmlElement> createComment(XmlParts xmlPart);
 public:
 	static std::shared_ptr<XmlProcessing::AbstractXmlElement> createElement(XMLPartWrapper xmlPart);

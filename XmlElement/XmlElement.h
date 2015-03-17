@@ -95,12 +95,15 @@ class AbstractXmlElement
     virtual std::string value() = 0;
     virtual std::string toString() = 0;
     virtual ~AbstractXmlElement();
-
+	virtual std::vector<std::pair<std::string, std::string>> attribs() = 0;
+	virtual std::vector<std::shared_ptr<AbstractXmlElement>> children()=0;
 	virtual void accept(AbstractXmlElementVisitor& visitor) = 0;
+
 
   protected:
     static size_t count;
     static size_t tabSize;
+
   };
 
   inline bool AbstractXmlElement::addChild(std::shared_ptr<AbstractXmlElement> pChild) { return false; }
@@ -135,6 +138,15 @@ class AbstractXmlElement
 		}
 	}
 
+	virtual std::vector<std::pair<std::string, std::string>> attribs()
+	{
+		return  std::vector<std::pair<std::string, std::string>>(); 
+	}
+	virtual std::vector<std::shared_ptr<AbstractXmlElement>> children() 
+	{
+		return children_;
+	}
+
   private:
     bool hasXmlRoot();
     std::vector<std::shared_ptr<AbstractXmlElement>> children_;
@@ -160,9 +172,17 @@ class AbstractXmlElement
     virtual std::string toString();
 	inline virtual void accept(AbstractXmlElementVisitor& visitor)
 	{
-		visitor.visit(*this);
+		return visitor.visit(*this);
 	}
 
+	virtual std::vector<std::pair<std::string, std::string>> attribs()
+	{
+		return  std::vector<std::pair<std::string, std::string>>();
+	}
+	virtual std::vector<std::shared_ptr<AbstractXmlElement>> children()
+	{
+		return std::vector<std::shared_ptr<AbstractXmlElement>>();
+	}
   private:
     std::string text_;
   };
@@ -205,6 +225,7 @@ class AbstractXmlElement
 		visitor.postVisit(*this);
 	}
 
+
   private:
     std::string tag_;
     std::vector<std::shared_ptr<AbstractXmlElement>> children_;
@@ -220,7 +241,6 @@ class AbstractXmlElement
 
   class CommentElement : public AbstractXmlElement
   {
-	 static int instances, deletes;
   public:
 	CommentElement(const std::string& text) : commentText_(text) { }
     CommentElement(const CommentElement& ce) = delete;
@@ -234,6 +254,14 @@ class AbstractXmlElement
 	}
 	CommentElement(CommentElement&& other);
 	CommentElement& operator=(CommentElement&& other);
+	virtual std::vector<std::pair<std::string, std::string>> attribs()
+	{
+		return  std::vector<std::pair<std::string, std::string>>();
+	}
+	virtual std::vector<std::shared_ptr<AbstractXmlElement>> children()
+	{
+		return std::vector<std::shared_ptr<AbstractXmlElement>>();
+	}
   private:
     std::string commentText_ = "to be defined";
   };
@@ -258,12 +286,19 @@ class AbstractXmlElement
     virtual bool addAttrib(const std::string& name, const std::string& value);
     virtual bool removeAttrib(const std::string& name);
     virtual std::string value() { return type_; }
-    virtual std::string toString() { return "to be defined"; }
-	std::vector<std::pair<std::string, std::string>> attribs(){ return attribs_; }
+	virtual std::string toString();
+
 	virtual void accept(AbstractXmlElementVisitor& visitor)
 	{
 		visitor.visit(*this);
 	}
+	virtual std::vector<std::shared_ptr<AbstractXmlElement>> children()
+	{
+		return std::vector<std::shared_ptr<AbstractXmlElement>>();
+	}
+	std::vector<std::pair<std::string, std::string>> attribs(){ return attribs_; }
+
+
   private:
     std::vector<std::pair<std::string, std::string>> attribs_;
     std::string type_ = "xml declaration";
@@ -281,19 +316,27 @@ class AbstractXmlElement
 	XmlDeclarElement(const XmlDeclarElement& pe) = delete;
     XmlDeclarElement() {}
 	XmlDeclarElement& operator=(const XmlDeclarElement& pe) = delete;
-    virtual bool addAttrib(const std::string& name, const std::string& value);
+    
 
 	XmlDeclarElement(XmlDeclarElement&& pe) = delete;
 	XmlDeclarElement& operator=(XmlDeclarElement&& pe) = delete;
 
+	virtual bool addAttrib(const std::string& name, const std::string& value);
     virtual bool removeAttrib(const std::string& name);
+
     virtual std::string value() { return ""; }
     virtual std::string toString();
-	std::vector<std::pair<std::string, std::string>> attribs(){ return attribs_; }
+
 	virtual void accept(AbstractXmlElementVisitor& visitor)
 	{
 		visitor.visit(*this);
 	}
+
+	virtual std::vector<std::shared_ptr<AbstractXmlElement>> children()
+	{
+		return std::vector<std::shared_ptr<AbstractXmlElement>>();
+	}
+	std::vector<std::pair<std::string, std::string>> attribs(){ return attribs_; }
 
   private:
     std::vector<std::pair<std::string, std::string>> attribs_;

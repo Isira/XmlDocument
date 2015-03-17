@@ -1,1 +1,11 @@
-﻿
+﻿  XmlDocument.cpp
+  XmlParser.cpp
+  Rules.cpp
+  Actions.cpp
+  XmlElement.cpp
+  xmlElementParts.cpp
+  Tokenizer.cpp
+  Repository.cpp
+  Visitors.cpp
+  Generating Code...
+  XmlDocument.vcxproj -> C:\Users\isira\Documents\Repository\XmlDocument\Debug\XmlDocument.exe

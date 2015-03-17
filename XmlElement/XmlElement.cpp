@@ -1,11 +1,18 @@
-///////////////////////////////////////////////////////////////////
-// XmlElement.cpp - define XML Element types                     //
-// ver 1.4                                                       //
-// Application: Help for CSE687 Pr#2, Spring 2015                //
-// Platform:    Dell XPS 2720, Win 8.1 Pro, Visual Studio 2013   //
-// Author:      Jim Fawcett, CST 4-187, 443-3948                 //
-//              jfawcett@twcny.rr.com                            //
-///////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+// XmlElement.cpp -  define XML Element types  							//
+// ver 1.0																//
+// ---------------------------------------------------------------------//
+// copyright © Isira Samarasekera, 2015									//
+// All rights granted provided that this notice is retained				//
+// ---------------------------------------------------------------------//
+// Language:    Visual C++, Visual Studio Ultimate 2013                 //
+// Platform:    Mac Book Pro, Core i5, Windows 8.1						//
+// Application: Project #2 – XmlDocument,2015							//
+// Author:      Isira Samarasekera, Syracuse University					//
+//              issamara@syr.edu										//
+// Source:      Jim Fawcett, CST 4-187, 443-3948						//
+//              jfawcett@twcny.rr.com									//
+//////////////////////////////////////////////////////////////////////////
 
 #include "XmlElement.h"
 #include <iostream>
@@ -15,8 +22,6 @@ using namespace XmlProcessing;
 size_t AbstractXmlElement::count = 0;
 size_t AbstractXmlElement::tabSize = 2;
 
-int CommentElement::instances = 0;
-int CommentElement::deletes = 0;
 
 //----< factory for doc elements >----------------------------------------
 
@@ -69,12 +74,15 @@ DocElement::DocElement(std::shared_ptr<AbstractXmlElement> pRoot)
     children_.push_back(pRoot);
 }
 
-DocElement::DocElement(DocElement&& doc)
+DocElement::DocElement(DocElement&& doc) :children_(std::move(doc.children_))
 {
 
 }
 DocElement& DocElement::operator=(DocElement&& doc)
 {
+	if (this == &doc)
+		return *this;
+	children_ = std::move(doc.children_);
 	return *this;
 }
 
@@ -208,7 +216,7 @@ std::string TaggedElement::value() { return tag_; }
 
 std::string TaggedElement::toString()
 {
-  std::string spacer(tabSize*++count, ' ');
+  std::string spacer(tabSize*count++, ' ');
   std::string xml = "\n" + spacer + "<" + tag_;
   for (auto at : attribs_)
   {
@@ -229,15 +237,35 @@ std::string TaggedElement::toString()
 
 std::string TextElement::toString()
 {
-  std::string spacer(tabSize * ++count, ' ');
+  std::string spacer(tabSize *count++, ' ');
   std::string xml = "\n" + spacer + text_;
   --count;
   return xml;
 }
+//----< generate xml string for Priocessing Instruction element >-------------------------------
+
+std::string ProcInstrElement::toString()
+{
+	std::string spacer(tabSize * count++, ' ');
+	std::string xml = "\n" + spacer + "<?" + type_ ;
+	for (auto at : attribs_)
+	{
+		xml += " ";
+		xml += at.first;
+		xml += "=\"";
+		xml += at.second;
+		xml += "\"";
+	}
+	xml += "?>";
+	--count;
+	return xml;
+}
+
 //----< add attribute to ProcInstElement >-----------------------------------
 
 bool ProcInstrElement::addAttrib(const std::string& name, const std::string& value)
 {
+  removeAttrib(name);
   std::pair<std::string, std::string> atPair(name, value);
   attribs_.push_back(atPair);
   return true;
@@ -260,8 +288,7 @@ bool ProcInstrElement::removeAttrib(const std::string& name)
 
 std::string XmlDeclarElement::toString()
 {
-  std::string spacer(tabSize * ++count, ' ');
-  std::string xml = "\n" + spacer + "<?xml";
+  std::string xml = "<?xml";
   for (auto at : attribs_)
   {
     xml += " ";
@@ -271,13 +298,13 @@ std::string XmlDeclarElement::toString()
     xml += "\"";
   }
   xml += "?>";
-  --count;
   return xml;
 }
 //----< add attribute to ProcInstElement >-----------------------------------
 
 bool XmlDeclarElement::addAttrib(const std::string& name, const std::string& value)
 {
+	removeAttrib(name);
   std::pair<std::string, std::string> atPair(name, value);
   attribs_.push_back(atPair);
   return true;
@@ -301,7 +328,7 @@ bool XmlDeclarElement::removeAttrib(const std::string& name)
 
 std::string CommentElement::toString()
 {
-	std::string spacer(tabSize * ++count, ' ');
+	std::string spacer(tabSize *count++, ' ');
 	std::string xml = "\n" + spacer + "<!--"+commentText_+"-->";
 	--count;
 	return xml;

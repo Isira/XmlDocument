@@ -1,1 +1,11 @@
-﻿
+﻿  Visitors.cpp
+  XmlParser.cpp
+  Rules.cpp
+  Actions.cpp
+  XmlElement.cpp
+  xmlElementParts.cpp
+  Tokenizer.cpp
+  XmlDocument.cpp
+  Repository.cpp
+  Generating Code...
+  AbstractXmlElementVisitor.vcxproj -> C:\Users\isira\Documents\Repository\XmlDocument\Debug\AbstractXmlElementVisitor.exe

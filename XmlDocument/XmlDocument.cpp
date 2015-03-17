@@ -1,11 +1,18 @@
-///////////////////////////////////////////////////////////////////
-// XmlDocument.cpp - a container of XmlElement nodes             //
-// Ver 1.2                                                       //
-// Application: Help for CSE687 Pr#2, Spring 2015                //
-// Platform:    Dell XPS 2720, Win 8.1 Pro, Visual Studio 2013   //
-// Author:      Jim Fawcett, CST 4-187, 443-3948                 //
-//              jfawcett@twcny.rr.com                            //
-///////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+// XmlDocument.cpp -   a container of XmlElement nodes   						    //
+// ver 1.0																//
+// ---------------------------------------------------------------------//
+// copyright © Isira Samarasekera, 2015									//
+// All rights granted provided that this notice is retained				//
+// ---------------------------------------------------------------------//
+// Language:    Visual C++, Visual Studio Ultimate 2013                 //
+// Platform:    Mac Book Pro, Core i5, Windows 8.1						//
+// Application: Project #2 – XmlDocument,2015							//
+// Author:      Isira Samarasekera, Syracuse University					//
+//              issamara@syr.edu										//
+// source:      Jim Fawcett, CST 4-187, 443-3948						//
+//              jfawcett@twcny.rr.com									//
+//////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
 #include "XmlDocument.h"
@@ -61,12 +68,27 @@ XmlProcessing::XmlDocument::XmlDocument(const std::string& src, sourceType srcTy
 	parser->add(rule4);
 	parser->add(rule5);
 
-	parser->parseFile(src);
-
+	parser->parse(src);
 	delete parser;
 }
 
-std::string XmlDocument::toString()
+
+XmlDocument::XmlDocument(XmlDocument&& doc) :pDocElement_(doc.pDocElement_), found_(std::move(doc.found_))
+{
+	doc.pDocElement_ = nullptr;
+}
+
+XmlDocument& XmlDocument::operator=(XmlDocument&& doc)
+{
+	if (this == &doc)
+		return *this;
+	pDocElement_ = doc.pDocElement_;
+	doc.pDocElement_ = nullptr;
+	found_ = std::move(doc.found_);
+	return *this;
+}
+
+std::string XmlDocument::toString() const
 {
 	return pDocElement_->toString();
 }
@@ -123,7 +145,15 @@ XmlDocument& XmlDocument::elementsWithAttribute(const std::string& attribute, co
 	AttributeIDFinderVisitor visitor(attribute, value);
 	pDocElement_->accept(visitor);
 	std::vector <AbstractXmlElement*> elems = visitor.select();
-	found_.insert(found_.end(), elems.begin(), elems.end());
+	if (elems.empty())
+	{
+		found_.push_back(nullptr);
+	}
+	else
+	{
+		found_.push_back(elems.front());
+	}
+	
 	return *this;
 }
 
@@ -132,6 +162,15 @@ std::vector<AbstractXmlElement*> XmlDocument::select()
 	return std::move(found_);
 }
 
+void XmlDocument::save(std::string filePath)
+{
+	std::ofstream out(filePath);
+	
+	out << pDocElement_->toString();
+	out.close();
+}
+
+#ifdef TEST_XMLDOCUMENT
 
 int main(int argc, char* argv[])
 {
@@ -164,20 +203,19 @@ int main(int argc, char* argv[])
 		"<comment>Description of PCDATA< / comment>"
 		"< / LectureNote>";
 	{
-		XmlDocument document(argv[1]);
-		//std::cout << document.toString();
+		XmlDocument document(argv[1],XmlDocument::filename);
+		std::cout << argv[1];
 		// <title>Programming Microsoft .Net</title>
-		//document.elements("LectureNote").descendents("author");
-		//std::vector<AbstractXmlElement*> results = document.select(); // size needs to be one and the 
-		//if(!results.empty() )
-		//{
-		//	for (auto i : results)
-		//	{
-		//		std::cout<< i->toString();
-		//	}
-		//	std::cout<<"\n";
-		//}
+		document.elements("LectureNote").descendents("author");
+		std::vector<AbstractXmlElement*> results = document.select(); // size needs to be one and the 
 
+		for (auto i : results)
+		{
+			std::cout << i->toString();
+		}
+		std::cout << "\n";
+
+	}
 		//document.elements("LectureNote").descendents("note");
 		//std::vector<AbstractXmlElement*> results = document.select(); // size needs to be one and the 
 		//if(!results.empty() )
@@ -191,7 +229,8 @@ int main(int argc, char* argv[])
 		//	std::cout<<"\n";
 		//}
 
-
+	{
+		XmlDocument document(argv[1],XmlDocument::filename);
 		document.elements("LectureNote").descendents("note");
 		std::vector<AbstractXmlElement*> results = document.select(); // size needs to be one and the 
 		if (!results.empty())
@@ -212,19 +251,23 @@ int main(int argc, char* argv[])
 	}*/
 
 	{
-		XmlDocument document(xmlString, XmlProcessing::XmlDocument::sourceType::string);
+		XmlDocument document(xmlString);
 		document.elementsWithAttribute("Company","Wintellect");
 
-		std::vector<AbstractXmlElement*> results = document.select(); // size needs to be one and the 
-		if (!results.empty())
+		AbstractXmlElement* result = document.select()[0]; // size needs to be one and the 
+		if (result == nullptr)
 		{
-			for (auto i : results)
-			{
-				std::cout << i->toString();
-			}
-			std::cout << "\n";
+			std::cout << "No results were returned";
 		}
+		else
+		{
+			std::cout << result->toString();
+		}
+		std::cout << "\n";
+
 	}
 
 }
+
+#endif
 

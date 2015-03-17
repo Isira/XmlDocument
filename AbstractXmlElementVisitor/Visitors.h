@@ -1,5 +1,43 @@
 #ifndef VISITORS_H
 #define VISITORS_H
+//////////////////////////////////////////////////////////////////////////
+// Visitors.h - Visitors of the AbstractXmlElement ASTs					//
+//																		//
+// ver 1.0																//
+// ---------------------------------------------------------------------//
+// copyright © Isira Samarasekera, 2015									//
+// All rights granted provided that this notice is retained				//
+// ---------------------------------------------------------------------//
+// Language:    Visual C++, Visual Studio Ultimate 2013                 //
+// Platform:    Mac Book Pro, Core i5, Windows 8.1						//
+// Application: Project #2 – XmlDocument,2015						//
+// Author:      Isira Samarasekera, Syracuse University					//
+//              issamara@syr.edu										//
+//////////////////////////////////////////////////////////////////////////
+/*
+* Module Operations:
+* ==================
+*
+* Public Interface:
+* =================
+
+*
+* Required Files:
+* ===============
+* AbstractXmlElementVisitor.h
+* Visitors.h , Visitors.cpp
+* XmlElement.h , XmlElement.cpp
+*
+* Build Process:
+* ================
+*  devenv XmlDocument.sln /debug rebuild
+*
+* Maintenance History:
+* ====================
+* ver 1.0 : 19 Mar 15
+* - first release
+*/
+
 #include "AbstractXmlElementVisitor.h"
 #include <vector>
 #include <memory>
@@ -12,14 +50,14 @@ namespace XmlProcessing
 		static size_t count;
 		static size_t tabSize;
 	public:
-		virtual bool visit(DocElement& element);
-		virtual bool visit(TextElement& element);
-		virtual bool visit(TaggedElement& element);
-		virtual bool visit(CommentElement& element);
-		virtual bool visit(ProcInstrElement& element);
-		virtual bool visit(XmlDeclarElement& element);
+		
+		virtual void visit(TextElement& element);
+		virtual void visit(TaggedElement& element);
+		virtual void visit(CommentElement& element);
+		virtual void visit(ProcInstrElement& element);
+		virtual void visit(XmlDeclarElement& element);
 
-		virtual bool postVisit(TaggedElement& element);
+		virtual void postVisit(TaggedElement& element);
 		virtual ~PrintVisitor(){}
 	};
 
@@ -29,7 +67,7 @@ namespace XmlProcessing
 		std::string _tag;
 	public:
 		ElementFinderVisitor(const std::string& tag);
-		virtual bool visit(TaggedElement& element);
+		virtual void visit(TaggedElement& element);
 		std::vector<AbstractXmlElement*>& select();
 		virtual ~ElementFinderVisitor();
 	};
@@ -42,8 +80,8 @@ namespace XmlProcessing
 		bool inside = false;
 	public:
 		DependentsFinderVisitor(AbstractXmlElement& element, const std::string& tag);
-		virtual bool visit(TaggedElement& element);
-		virtual bool postVisit(TaggedElement& element);
+		virtual void visit(TaggedElement& element);
+		virtual void postVisit(TaggedElement& element);
 		std::vector<AbstractXmlElement*>& select();
 		virtual ~DependentsFinderVisitor();
 	};
@@ -56,7 +94,7 @@ namespace XmlProcessing
 		bool inside = false;
 	public:
 		ChildrenFinderVisitor(AbstractXmlElement& element,const std::string& tag);
-		virtual bool visit(TaggedElement& element);
+		virtual void visit(TaggedElement& element);
 		std::vector<AbstractXmlElement*>& select();
 		virtual ~ChildrenFinderVisitor();
 	};
@@ -68,9 +106,9 @@ namespace XmlProcessing
 		std::string value_;
 	public:
 		AttributeIDFinderVisitor(const std::string& idAttribute, const std::string& value);
-		virtual bool visit(TaggedElement& element);
-		virtual bool visit(XmlDeclarElement& element);
-		virtual bool visit(ProcInstrElement& element);
+		virtual void visit(TaggedElement& element);
+		virtual void visit(XmlDeclarElement& element);
+		virtual void visit(ProcInstrElement& element);
 		std::vector<AbstractXmlElement*>& select();
 		virtual ~AttributeIDFinderVisitor();
 	};
