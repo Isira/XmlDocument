@@ -1,9 +1,0 @@
-﻿  XmlParser.cpp
-  Rules.cpp
-  Actions.cpp
-  XmlElement.cpp
-  xmlElementParts.cpp
-  Tokenizer.cpp
-  Repository.cpp
-  Generating Code...
-  XmlParser.vcxproj -> C:\Users\isira\Documents\Repository\XmlDocument\Debug\XmlParser.exe

@@ -83,25 +83,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\AbstractXmlElementVisitor\Visitors.h" />
-    <ClInclude Include="..\Repository\Repository.h" />
     <ClInclude Include="..\XmlElementParts\Tokenizer.h" />
     <ClInclude Include="..\XmlElementParts\xmlElementParts.h" />
+    <ClInclude Include="..\XmlElement\AbstractXmlElement.h" />
     <ClInclude Include="..\XmlElement\XmlElement.h" />
-    <ClInclude Include="..\XmlParser\Actions.h" />
-    <ClInclude Include="..\XmlParser\Rules.h" />
-    <ClInclude Include="..\XmlParser\XmlParser.h" />
     <ClInclude Include="XmlDocument.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\AbstractXmlElementVisitor\Visitors.cpp" />
-    <ClCompile Include="..\Repository\Repository.cpp" />
+    <ClCompile Include="..\DocumentBuilder\DocumentBuilder.cpp" />
     <ClCompile Include="..\XmlElementParts\Tokenizer.cpp" />
     <ClCompile Include="..\XmlElementParts\xmlElementParts.cpp" />
+    <ClCompile Include="..\XmlElement\AbstractXmlElement.cpp" />
     <ClCompile Include="..\XmlElement\XmlElement.cpp" />
-    <ClCompile Include="..\XmlParser\Actions.cpp" />
-    <ClCompile Include="..\XmlParser\Rules.cpp" />
-    <ClCompile Include="..\XmlParser\XmlParser.cpp" />
+    <ClCompile Include="..\XmlElement\XmlElementFactory.cpp" />
     <ClCompile Include="XmlDocument.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

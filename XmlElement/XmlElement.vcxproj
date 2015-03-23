@@ -11,11 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\AbstractXmlElementVisitor\AbstractXmlElementVisitor.h" />
+    <ClInclude Include="AbstractXmlElement.h" />
     <ClInclude Include="XmlElement.h" />
+    <ClInclude Include="XmlElementFactory.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AbstractXmlElement.cpp" />
     <ClCompile Include="XmlElement.cpp" />
+    <ClCompile Include="XmlElementFactory.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{406B7BC4-3A0D-4E79-A55F-39E1FB33A5ED}</ProjectGuid>
@@ -58,7 +61,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);TEST_XMLELEMENT</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions);TEST_XMLELEMENTFACTORY</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <BrowseInformation>true</BrowseInformation>
     </ClCompile>

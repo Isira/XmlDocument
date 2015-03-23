@@ -1,2 +1,5 @@
-﻿  XmlElement.cpp
+﻿  XmlElementFactory.cpp
+  XmlElement.cpp
+  AbstractXmlElement.cpp
+  Generating Code...
   XmlElement.vcxproj -> C:\Users\isira\Documents\Repository\XmlDocument\Debug\XmlElement.exe

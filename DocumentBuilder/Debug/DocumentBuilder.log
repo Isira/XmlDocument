@@ -1,0 +1,9 @@
+﻿  DocumentBuilder.cpp
+  XmlElementFactory.cpp
+  XmlElement.cpp
+  AbstractXmlElement.cpp
+  xmlElementParts.cpp
+  Tokenizer.cpp
+  XmlDocument.cpp
+  Generating Code...
+  DocumentBuilder.vcxproj -> C:\Users\isira\Documents\Repository\XmlDocument\Debug\DocumentBuilder.exe

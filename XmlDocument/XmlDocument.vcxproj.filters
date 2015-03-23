@@ -21,25 +21,19 @@
     <ClCompile Include="..\XmlElement\XmlElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\XmlParser\XmlParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\XmlElementParts\Tokenizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\XmlElementParts\xmlElementParts.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Repository\Repository.cpp">
+    <ClCompile Include="..\DocumentBuilder\DocumentBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\XmlParser\Actions.cpp">
+    <ClCompile Include="..\XmlElement\XmlElementFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\XmlParser\Rules.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\AbstractXmlElementVisitor\Visitors.cpp">
+    <ClCompile Include="..\XmlElement\AbstractXmlElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,25 +44,13 @@
     <ClInclude Include="..\XmlElement\XmlElement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\XmlParser\Actions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\XmlParser\Rules.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\XmlParser\XmlParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\XmlElementParts\Tokenizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\XmlElementParts\xmlElementParts.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Repository\Repository.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\AbstractXmlElementVisitor\Visitors.h">
+    <ClInclude Include="..\XmlElement\AbstractXmlElement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

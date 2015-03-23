@@ -2,18 +2,18 @@
 #define XMLDOCUMENT_H
 ///////////////////////////////////////////////////////////////////
 // XmlDocument.h - a container of XmlElement nodes               //
-// Ver 1.2                                                       //
+// Ver 1.3                                                       //
 // Application: Help for CSE687 Pr#2, Spring 2015                //
 // Platform:    Dell XPS 2720, Win 8.1 Pro, Visual Studio 2013   //
-// Author:      Jim Fawcett, CST 4-187, 443-3948                 //
+// Author:      Isira Samarasekera, Syracuse University			 //
+//              issamara@syr.edu								 //
+// Source:      Jim Fawcett, CST 4-187, 443-3948                 //
 //              jfawcett@twcny.rr.com                            //
 ///////////////////////////////////////////////////////////////////
 /*
 * Package Operations:
 * -------------------
-* This package is intended to help students in CSE687 - Object Oriented Design
-* get started with Project #2 - XML Document Model.  It uses C++11 constructs,
-* most noteably std::shared_ptr.  The XML Document Model is essentially
+* The XML Document Model is essentially
 * a program-friendly wrapper around an Abstract Syntax Tree (AST) used to
 * contain the results of parsing XML markup.
 *
@@ -44,6 +44,7 @@
 *
 * Maintenance History:
 * --------------------
+* ver 1.3 : 20 Mar 15
 * ver 1.2 : 21 Feb 15
 * - modified these comments
 * ver 1.1 : 14 Feb 15
@@ -51,31 +52,25 @@
 * Ver 1.0 : 11 Feb 15
 * - first release
 *
-* ToDo:
-* -----
-* This is the beginning of an XmlDocument class for Project #2.  
-* It lays out a suggested design, which you are not compelled to follow.
-* If it helps then use it.  If not you don't have to.
-*
-* Note that I've simply roughed in a design that is similar to that
-* used in the .Net Framework XDocument class.
 */
 
 #include <memory>
 #include <string>
-#include "../XmlElement/XmlElement.h"
+#include "../XmlElement/AbstractXmlElement.h"
 
 namespace XmlProcessing
 {
+  using sPtr = std::shared_ptr < AbstractXmlElement >;
   class XmlDocument
   {
   public:
-    using sPtr = std::shared_ptr < AbstractXmlElement > ;
+  
 
     enum sourceType { string, filename };
 
+	XmlDocument(){}
     XmlDocument(const std::string& src, sourceType srcType=string);
-    
+
     // queries return XmlDocument references so they can be chained, e.g., doc.element("foobar").descendents();
 	XmlDocument(const XmlDocument& tag)= delete;
 	XmlDocument& operator = (const XmlDocument& tag) = delete;
@@ -86,21 +81,51 @@ namespace XmlProcessing
 
 	XmlDocument& elementsWithAttribute(const std::string& attribute, const std::string& value);  // found_ contains sPtrs to descendents of prior found_[0]
 
-	std::vector<AbstractXmlElement*> select();                            // return reference to found_.  Use std::move(found_) to clear found_
+	std::vector<sPtr> select();                            // return reference to found_.  Use std::move(found_) to clear found_
 	std::string toString() const;
-	void accept(AbstractXmlElementVisitor& visitor)
-	{
-		pDocElement_->accept(visitor);
-	}
 
 	XmlDocument(XmlDocument&& doc);
 	XmlDocument& operator=(XmlDocument&& doc);
 
 	void save(std::string filePath);
+	
+
+	std::string src()
+	{
+		return _src;
+	}
+	sourceType srcType()
+	{
+		return _srcType;
+	}
+	void setDocElement(sPtr pDocElement)
+	{
+		pDocElement_ = pDocElement;
+	}
+
+	sPtr docElement()
+	{
+		return pDocElement_;
+	}
+
 
   private:
     sPtr pDocElement_;         // AST that holds procInstr, comments, XML root, and more comments
-    std::vector<AbstractXmlElement*> found_;  // query results
+	std::vector<sPtr> found_;  // query results
+	std::string _src;
+	sourceType _srcType;
   };
+
+  template<typename CallObj>
+  void DFS(sPtr pNode, CallObj& co)
+  {
+	  co(pNode);
+	  for (auto pChild : pNode->children())
+		  DFS(pChild, co);
+	
+  }
+
 }
+
+std::ostream& operator<< (std::ostream& stream, const XmlProcessing::XmlDocument& doc);
 #endif

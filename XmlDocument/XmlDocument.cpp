@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
-// XmlDocument.cpp -   a container of XmlElement nodes   						    //
+// XmlDocument.cpp -   a container of XmlElement nodes   				//
 // ver 1.0																//
 // ---------------------------------------------------------------------//
 // copyright © Isira Samarasekera, 2015									//
@@ -10,73 +10,31 @@
 // Application: Project #2 – XmlDocument,2015							//
 // Author:      Isira Samarasekera, Syracuse University					//
 //              issamara@syr.edu										//
-// source:      Jim Fawcett, CST 4-187, 443-3948						//
+// Source:      Jim Fawcett, CST 4-187, 443-3948						//
 //              jfawcett@twcny.rr.com									//
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <fstream>
+#include <functional>
 #include "XmlDocument.h"
-#include "../XmlParser/XmlParser.h"
-#include "../AbstractXmlElementVisitor/Visitors.h"
+#include "../XmlElement/XmlElementFactory.h"
 using namespace XmlProcessing;
 
-XmlProcessing::XmlDocument::XmlDocument(const std::string& src, sourceType srcType)
+//----< construct XmlDocument instance >---------------------------
+
+XmlProcessing::XmlDocument::XmlDocument(const std::string& src, sourceType srcType) : _src(src), _srcType(srcType)
 {
-	XmlParser *parser= nullptr;
-	if (srcType == filename)
-	{
-		parser = new XmlFileParser();
-	}
-	else if (srcType == string)
-	{
-		parser = new XmlStringParser();
-	}
-	Repository repo;
-	pDocElement_ = makeDocElement();
-	repo.pushToStack(pDocElement_);
-
-	std::shared_ptr<ARule> rule0(new DetectTextElement());
-	std::shared_ptr<ARule> rule1(new DetectProcIns());
-	std::shared_ptr<ARule> rule2(new DetectComment());
-	std::shared_ptr<ARule> rule3(new DetectElement());
-	std::shared_ptr<ARule> rule4(new DetectEndElement());
-	std::shared_ptr<ARule> rule5(new DetectDeclare());
-
-	std::shared_ptr<AAction> action1(new PushStack(repo));
-	std::shared_ptr<AAction> action2(new PopStack(repo));
-
-	rule0->add(action1);
-	rule0->add(action2);
-
-	rule1->add(action1);
-	rule1->add(action2);
-
-	rule2->add(action1);
-	rule2->add(action2);
-
-	rule3->add(action1);
-
-	rule4->add(action2);
-
-	rule5->add(action1);
-	rule5->add(action2);
-
-	parser->add(rule0);
-	parser->add(rule1);
-	parser->add(rule2);
-	parser->add(rule3);
-	parser->add(rule4);
-	parser->add(rule5);
-
-	parser->parse(src);
-	delete parser;
 }
 
+//----< move constructor for XmlDocument >---------------------------
 
 XmlDocument::XmlDocument(XmlDocument&& doc) :pDocElement_(doc.pDocElement_), found_(std::move(doc.found_))
 {
 	doc.pDocElement_ = nullptr;
 }
+
+//----< move assignement for XmlDocument >---------------------------
 
 XmlDocument& XmlDocument::operator=(XmlDocument&& doc)
 {
@@ -88,96 +46,148 @@ XmlDocument& XmlDocument::operator=(XmlDocument&& doc)
 	return *this;
 }
 
+//----< get String representation of XmlDocument >---------------------------
+
 std::string XmlDocument::toString() const
 {
-	return pDocElement_->toString();
+	std::string ast = "";
+	if (pDocElement_!= nullptr)
+		ast = pDocElement_->toString();
+	return ast;
 }
+
+//----< search xmlDocument for a element with the tag element and push to the first element to _found vector >---------------------------
 
 XmlDocument& XmlDocument::element(const std::string& tag)
 {
-	ElementFinderVisitor visitor(tag);
-	pDocElement_->accept(visitor);
-	std::vector<AbstractXmlElement*> elems = visitor.select();
-	found_.push_back((elems[0]));
+	found_.clear();
+	std::function<void(sPtr)> f =
+		[&](sPtr pNode) { 
+		if (found_.empty() && (tag == "" || pNode->tag() == tag))
+		{ 
+			found_.push_back(pNode); 
+		}
+	};
+
+	DFS(pDocElement_,f);
 	return *this;
 }
+
+//----< search xmlDocument for a element with the tag element and push all to _found vector >---------------------------
 
 XmlDocument& XmlDocument::elements(const std::string& tag)
 {
-	ElementFinderVisitor visitor(tag);
-	pDocElement_->accept(visitor);
-	std::vector <AbstractXmlElement*> elems = visitor.select();
-	found_.insert(found_.end(), elems.begin(), elems.end());
+	found_.clear();
+	std::function<void(sPtr)> f =
+		[&](sPtr pNode) {
+		if (tag == "" || pNode->tag() == tag)
+		{
+			found_.push_back(pNode);
+		}
+	};
+
+	DFS(pDocElement_, f);
 	return *this;
 }
+
+//---< search xmlDocument for a children  with the tag, in the _found vector  and push all to _found vector >---------------------------
 
 XmlDocument& XmlDocument::children(const std::string& tag)
 {
-	std::vector <AbstractXmlElement*> elems;
-	for (auto it : found_)
+	if (found_.empty())
+		found_.push_back(pDocElement_);
+
+	sPtr pNode = found_[0];
+	found_.clear();
+	std::vector<sPtr> children = pNode->children();
+	for (auto it = children.begin(); it != children.end(); it++)
 	{
-		ChildrenFinderVisitor visitor(*it,tag);
-		it->accept(visitor);
-		std::vector<AbstractXmlElement*> results = visitor.select();
-		elems.insert(elems.end(), results.begin(),results.end());
+		if ((*it)->tag() == tag || tag == "" )
+			found_.push_back((*it));
 	}
-	found_ = std::move(elems);
 	return *this;
 }
+
+//---< search xmlDocument for a discendants with the tag, in the _found vector  and push all to _found vector >---------------------------
 
 XmlDocument& XmlDocument::descendents(const std::string& tag)
 {
-	std::vector <AbstractXmlElement*> elems;
-	for (auto it : found_)
-	{
-		DependentsFinderVisitor visitor(*it, tag);
-		it->accept(visitor);
-		std::vector<AbstractXmlElement*> results = visitor.select();
-		elems.insert(elems.end(), results.begin(), results.end());
-	}
-	found_ = std::move(elems);
+	if (found_.empty())
+		found_.push_back(pDocElement_);
+
+	std::function<void(sPtr)> f =
+		[&](sPtr pNode) {
+		std::vector<std::shared_ptr<AbstractXmlElement>> children = pNode->children();
+		for (auto it = children.begin(); it != children.end(); it++)
+		{
+			if (tag == "" || (*it)->tag() == tag )
+				found_.push_back((*it));
+		}
+	};
+
+	sPtr ptr= std::shared_ptr<AbstractXmlElement>(found_[0]);
+	found_.clear();
+	DFS(ptr, f);
+
 	return *this;
 }
 
-
+//---< search xmlDocument for elements with the matching attribute name, value pair, and push it in to the found vector>---------------------------
+ 
 XmlDocument& XmlDocument::elementsWithAttribute(const std::string& attribute, const std::string& value)
 {
-	AttributeIDFinderVisitor visitor(attribute, value);
-	pDocElement_->accept(visitor);
-	std::vector <AbstractXmlElement*> elems = visitor.select();
-	if (elems.empty())
-	{
-		found_.push_back(nullptr);
-	}
-	else
-	{
-		found_.push_back(elems.front());
-	}
+	found_.clear();
 	
+	std::function<void(sPtr)> f =
+		[&](sPtr pNode) {
+		if (found_.empty())
+		{
+			std::vector<std::pair<std::string, std::string>> attbs = pNode->attribs();
+			for (auto it: attbs)
+			{
+				if (it.first == attribute && it.second == value )
+					found_.push_back(pNode);
+			}	
+		}
+	};
+
+	DFS(pDocElement_, f);
+	if (found_.empty())
+		found_.push_back(nullptr);
 	return *this;
 }
+//---< get the contents of the found_ vector and clear the contents>---------------------------
 
-std::vector<AbstractXmlElement*> XmlDocument::select()
+std::vector<sPtr> XmlDocument::select()
 {
 	return std::move(found_);
 }
+
+//---< save the XmlDocument in the file path provided>---------------------------
 
 void XmlDocument::save(std::string filePath)
 {
 	std::ofstream out(filePath);
 	
-	out << pDocElement_->toString();
+	out << *this;
 	out.close();
 }
 
+//---< insertion operator for XmlDocument >---------------------------
+
+std::ostream& operator<< (std::ostream& stream, const XmlDocument& doc)
+{
+	stream << doc.toString();
+	return stream;
+}
+
 #ifdef TEST_XMLDOCUMENT
+#include "../DocumentBuilder/DocumentBuilder.h"
 
 int main(int argc, char* argv[])
 {
 	std::cout << "\n  Testing XmlDocument class\n "
 		<< std::string(23, '=') << std::endl;
-	std::cout
-		<< "\n  Note that quotes are returned as single tokens\n\n";
 
 	if (argc < 2)
 	{
@@ -190,7 +200,7 @@ int main(int argc, char* argv[])
 	std::cout << "\n  " << std::string(16 + strlen(argv[1]), '-') ;
 
 	std::string xmlString = "< ? xml version = \"1.0\" encoding = \"utf - 8\" ? >"
-		"<!--XML test---- - case -->"
+		"<!--XML testcase -->"
 		"<LectureNote course = \"CSE681\">"
 		"<title>XML Example #1 < / title >"
 		"<reference>"
@@ -204,16 +214,20 @@ int main(int argc, char* argv[])
 		"< / LectureNote>";
 	{
 		XmlDocument document(argv[1],XmlDocument::filename);
-		std::cout << argv[1];
 		// <title>Programming Microsoft .Net</title>
-		document.elements("LectureNote").descendents("author");
-		std::vector<AbstractXmlElement*> results = document.select(); // size needs to be one and the 
-
+		DocumentBuilder builder;
+		builder.build(document);
+		document.element("").children("");
+		std::vector<sPtr> results = document.select(); // size needs to be one and the 
+		std::cout << "\n";
 		for (auto i : results)
 		{
+			std::cout << "\nchild\n";
 			std::cout << i->toString();
+			std::cout << "\n";
 		}
-		std::cout << "\n";
+		
+
 
 	}
 		//document.elements("LectureNote").descendents("note");
@@ -231,15 +245,17 @@ int main(int argc, char* argv[])
 
 	{
 		XmlDocument document(argv[1],XmlDocument::filename);
+		DocumentBuilder builder;
+		builder.build(document);
 		document.elements("LectureNote").descendents("note");
-		std::vector<AbstractXmlElement*> results = document.select(); // size needs to be one and the 
+		std::vector<sPtr> results = document.select(); // size needs to be one and the 
 		if (!results.empty())
 		{
 			for (auto i : results)
 			{
 				i->addAttrib("Company", "myVal");
-				i->addChild(makeTaggedElement("This is the comment"));
-				std::cout << document.toString();
+				i->addChild(XmlElementFactory::makeTaggedElement("This is the comment"));
+				//std::cout << document.toString();
 			}
 			std::cout << "\n";
 		}
@@ -252,22 +268,25 @@ int main(int argc, char* argv[])
 
 	{
 		XmlDocument document(xmlString);
-		document.elementsWithAttribute("Company","Wintellect");
+		DocumentBuilder builder;
+		builder.build(document);
+		document.elementsWithAttribute("course","CSE681");
 
-		AbstractXmlElement* result = document.select()[0]; // size needs to be one and the 
+		sPtr result = document.select()[0]; // size needs to be one and the 
 		if (result == nullptr)
 		{
 			std::cout << "No results were returned";
 		}
 		else
 		{
-			std::cout << result->toString();
+		     std::cout << result->toString();
 		}
 		std::cout << "\n";
 
 	}
 
 }
-
 #endif
+
+
 

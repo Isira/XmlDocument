@@ -18,12 +18,21 @@
     <ClInclude Include="XmlElement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\AbstractXmlElementVisitor\AbstractXmlElementVisitor.h">
+    <ClInclude Include="AbstractXmlElement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XmlElementFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="XmlElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AbstractXmlElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XmlElementFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

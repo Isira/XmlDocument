@@ -17,55 +17,9 @@
 #include "XmlElement.h"
 #include <iostream>
 
+
 using namespace XmlProcessing;
 
-size_t AbstractXmlElement::count = 0;
-size_t AbstractXmlElement::tabSize = 2;
-
-
-//----< factory for doc elements >----------------------------------------
-
-std::shared_ptr<AbstractXmlElement> XmlProcessing::makeDocElement(std::shared_ptr<AbstractXmlElement> pRoot)
-{
-  std::shared_ptr<AbstractXmlElement> ptr(new DocElement(pRoot));
-  return ptr;
-}
-
-//----< factory for tagged elements >----------------------------------------
-
-std::shared_ptr<AbstractXmlElement> XmlProcessing::makeTaggedElement(const std::string& tag)
-{
-  std::shared_ptr<AbstractXmlElement> ptr(new TaggedElement(tag));
-  return ptr;
-}
-//----< factory for text elements >------------------------------------------
-
-std::shared_ptr<AbstractXmlElement> XmlProcessing::makeTextElement(const std::string& text)
-{
-  std::shared_ptr<AbstractXmlElement> ptr(new TextElement(text));
-  return ptr;
-}
-//----< factory for comment elements >---------------------------------------
-
-std::shared_ptr<AbstractXmlElement> XmlProcessing::makeCommentElement(const std::string& text)
-{
-  std::shared_ptr<AbstractXmlElement> ptr(new CommentElement(text));
-  return ptr;
-}
-//----< factory for processing instruction elements >------------------------
-
-std::shared_ptr<AbstractXmlElement> XmlProcessing::makeProcInstrElement(const std::string& text)
-{
-  std::shared_ptr<AbstractXmlElement> ptr(new ProcInstrElement(text));
-  return ptr;
-}
-//----< factory for XML Declaration elements >-------------------------------
-
-std::shared_ptr<AbstractXmlElement> XmlProcessing::makeXmlDeclarElement()
-{
-  std::shared_ptr<AbstractXmlElement> ptr(new XmlDeclarElement());
-  return ptr;
-}
 //----< doc element constructor and destructor >-----------------------------
 
 DocElement::DocElement(std::shared_ptr<AbstractXmlElement> pRoot) 
@@ -74,10 +28,15 @@ DocElement::DocElement(std::shared_ptr<AbstractXmlElement> pRoot)
     children_.push_back(pRoot);
 }
 
+//----< doc element move constructor >-----------------------------
+
 DocElement::DocElement(DocElement&& doc) :children_(std::move(doc.children_))
 {
 
 }
+
+//----< doc element move assingmenet operator >-----------------------------
+
 DocElement& DocElement::operator=(DocElement&& doc)
 {
 	if (this == &doc)
@@ -97,6 +56,19 @@ bool DocElement::hasXmlRoot()
   }
   return false;
 }
+
+//----< private helper for DocElement::addChild(...) >-----------------------
+
+bool DocElement::hasXmlDecl()
+{
+	for (auto pElement : children_)
+	{
+		if (dynamic_cast<XmlDeclarElement*>(pElement.get()) != nullptr)
+			return true;
+	}
+	return false;
+}
+
 //----< add only one child to doc element using pointer to child >-----------
 
 bool DocElement::addChild(std::shared_ptr<AbstractXmlElement> pChild)
@@ -111,10 +83,23 @@ bool DocElement::addChild(std::shared_ptr<AbstractXmlElement> pChild)
   if (pDcEl != 0)  // don't add text elements to DocElement
     return false;
 
+  // add XmlDeclaration
+  XmlDeclarElement* pXcEl = dynamic_cast<XmlDeclarElement*>(pChild.get());
+  if (pXcEl != 0)
+  {
+	  if (!hasXmlDecl()) // add only one declaration always in the begining
+	  {
+		  children_.insert(children_.begin(),pChild);
+		  return true;
+	  }
+	  return false;
+  }  
+
   // add ProcInstrElements and CommentElements 
   TaggedElement* te = dynamic_cast<TaggedElement*>(pChild.get());
   if (te == nullptr) // is not a TaggedElement
   {
+	  DocElement* pDcEl = dynamic_cast<DocElement*>(pChild.get());
     children_.push_back(pChild);
     return true;
   }
@@ -156,6 +141,10 @@ std::string DocElement::toString()
 
 bool TaggedElement::addChild(std::shared_ptr<AbstractXmlElement> pChild)
 {
+	// don't add XmlDeclarElement
+ XmlDeclarElement* pTxEl = dynamic_cast<XmlDeclarElement*>(pChild.get());
+ if (pTxEl != 0)  
+	return false;
   children_.push_back(pChild);
   return true;
 }
@@ -362,15 +351,17 @@ int main()
 
   using sPtr = std::shared_ptr < AbstractXmlElement > ;
 
-  sPtr root = makeTaggedElement("root");
-  root->addChild(makeTextElement("this is a test"));
+  sPtr root(new TaggedElement("root"));
+  sPtr txt(new TextElement("this is a test"));
+  root->addChild(txt);
 
-  sPtr child = makeTaggedElement("child");
-  child->addChild(makeTextElement("this is another test"));
+  sPtr child(new TaggedElement("child"));
+  sPtr txtChild(new TextElement("this is another test"));
+  child->addChild(txtChild);
   child->addAttrib("first", "test");
   root->addChild(child);
 
-  sPtr docEl = makeDocElement(root);
+  sPtr docEl(new DocElement(root));
   std::cout << "  " << docEl->toString();
   std::cout << "\n\n";
 }
